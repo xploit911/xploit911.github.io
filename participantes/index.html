@@ -1,1 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rifa Transparente - Participantes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: linear-gradient(135deg, #1a2980, #26d0ce);
+      min-height: 100vh;
+      color: #222;
+    }
+    .container {
+      max-width: 850px;
+      margin: 40px auto;
+      background: rgba(255,255,255,0.94);
+      border-radius: 18px;
+      box-shadow: 0 10px 40px rgba(30,30,80,0.13);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 0.15em;
+      color: #144e75;
+      font-size: 2.5em;
+      letter-spacing: 2px;
+    }
+    p {
+      color: #38425a;
+      margin-bottom: 28px;
+    }
+    .actualizando {
+      color: #888;
+      font-size: 1em;
+      margin-bottom: 1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .spin {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #27ae60;
+      border-radius: 50%;
+      width: 17px;
+      height: 17px;
+      animation: spin 1.1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    table {
+      width: 100%;
+      border-radius: 8px;
+      overflow: hidden;
+      border-collapse: collapse;
+      margin-top: 22px;
+      margin-bottom: 25px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(50,70,150,0.04);
+    }
+    th, td {
+      padding: 12px 8px;
+      font-size: 1.06em;
+      text-align: center;
+    }
+    th {
+      background: #1a7ba1;
+      color: #fff;
+      font-weight: 700;
+    }
+    tr:nth-child(even){ background:#e8f5fd; }
+    .estado-disponible { color: #27ae60; font-weight: 700; }
+    .estado-vendido { color: #e84343; font-weight: 700; text-decoration: line-through;}
+    @media (max-width: 650px) {
+      .container { padding: 16px 2vw; }
+      th, td { padding: 7px 3px; font-size: 0.97em; }
+      h1 { font-size: 2em; }
+    }
+    footer {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 18px;
+      font-size: 0.97em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Rifa Transparente</h1>
+    <p>¡Bienvenidos! Aquí puedes consultar todos los boletos/participantes de la rifa en tiempo real.<br>
+    La lista se actualiza automáticamente cada minuto para garantizar total transparencia.</p>
+    <div class="actualizando" id="actualizando">
+      <div class="spin"></div> Cargando y actualizando participantes...
+    </div>
+    <div id="tabla-participantes"></div>
+  </div>
+  <footer>Hecho con ♥ para la comunidad | Última actualización: <span id="fecha-hora"></span></footer>
 
+  <script>
+    const urlCSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGRh9mQsyUV8_pwye5MwALot-VwzA2WLe3X3_QKEDsRjOitG8K0OoW48u5DKV1_xJZJ_k8N13p7adf/pub?gid=6566771&single=true&output=csv";
+    const tablaDiv = document.getElementById('tabla-participantes');
+    const actualizandoDiv = document.getElementById('actualizando');
+    const fechaHoraSpan = document.getElementById('fecha-hora');
+
+    async function cargarParticipantes() {
+      actualizandoDiv.style.display = 'flex';
+      try {
+        const response = await fetch(urlCSV + `&t=${Date.now()}`);
+        if (!response.ok) throw new Error('No se pudo cargar el archivo CSV');
+        const csv = await response.text();
+        const filas = csv.trim().split(/\r?\n/);
+        let html = `
+          <table>
+            <thead>
+              <tr><th>Ticket</th><th>Nombre</th><th>Estado</th></tr>
+            </thead>
+            <tbody>
+        `;
+        for(let i=1; i<filas.length; i++){
+          const columnas = filas[i].split(',');
+          if(columnas.length < 3) continue;
+          const [ticket, nombre, estado] = columnas;
+          html += `<tr>
+            <td>${ticket.trim()}</td>
+            <td>${nombre.trim()}</td>
+            <td class="${estado.trim() === 'Vendido' ? 'estado-vendido' : 'estado-disponible'}">
+              ${estado.trim()}
+            </td>
+          </tr>`;
+        }
+        html += `</tbody></table>`;
+        tablaDiv.innerHTML = html;
+        const fecha = new Date();
+        fechaHoraSpan.textContent = fecha.toLocaleString('es-ES');
+      } catch (error) {
+        tablaDiv.innerHTML = '<b>¡No se pudieron cargar los participantes!</b>';
+      }
+      setTimeout(() => { actualizandoDiv.style.display = 'none'; }, 1000);
+    }
+
+    // Inicial y actualización cada minuto
+    cargarParticipantes();
+    setInterval(cargarParticipantes, 60*1000);
+  </script>
+</body>
+    </html>
