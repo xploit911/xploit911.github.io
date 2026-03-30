@@ -1,12 +1,212 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Agencia de Publicidad BQTO</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xyrion Labs - Agencia de Publicidad, Promoción y Descuentos</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --secondary: #facc15;
+      --bg: #f9fafb;
+      --text: #1e293b;
+      --accent: #06b6d4;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      padding: 2rem 1.5rem 1rem 1.5rem;
+      background: linear-gradient(90deg, var(--primary) 50%, var(--accent) 100%);
+      color: #fff;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    .brand h1 {
+      font-size: 2.7rem;
+      letter-spacing: -1.5px;
+      margin: 0 0 0.5rem 0;
+    }
+    .brand p {
+      font-size: 1.2rem;
+      margin: 0;
+      opacity: 0.9;
+    }
+    nav {
+      margin-top: 2rem;
+      display: flex;
+      gap: 2rem;
+      font-size: 1.05rem;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+    nav a:hover {
+      opacity: 0.7;
+    }
+    .hero {
+      text-align: center;
+      padding: 3rem 0 2rem 0;
+    }
+    .hero h2 {
+      font-size: 2rem;
+      margin: 0 0 1rem 0;
+    }
+    .hero p {
+      font-size: 1.18rem;
+      color: #4b5563;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+    .cta {
+      display: inline-block;
+      background: var(--secondary);
+      color: #473b1d;
+      padding: 0.9rem 2.3rem;
+      font-size: 1.07rem;
+      border-radius: 3rem;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 3px 10px 0 rgba(80,60,20,0.07);
+      transition: background 0.2s;
+      letter-spacing: 1px;
+    }
+    .cta:hover {
+      background: #ffe066;
+      color: #222;
+    }
+    .features {
+      margin: 4rem 0 3rem 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2rem;
+    }
+    .feature {
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 2px 22px 0 rgba(44,63,99,0.08);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .feature:hover {
+      transform: translateY(-7px) scale(1.03);
+      box-shadow: 0 7px 32px 0 rgba(44,63,99,0.13);
+    }
+    .feature h3 {
+      margin-top: 0.7rem;
+      margin-bottom: 0.7rem;
+      color: var(--primary);
+      font-size: 1.3rem;
+    }
+    .feature p {
+      font-size: 1.02rem;
+      color: #64748b;
+      margin: 0;
+    }
+    .footer {
+      background: #1e293b;
+      color: #fff;
+      text-align: center;
+      padding: 2rem 1rem 1rem 1rem;
+      margin-top: 3rem;
+      border-top-left-radius: 2rem;
+      border-top-right-radius: 2rem;
+    }
+    .footer small {
+      opacity: 0.75;
+      font-size: 0.95rem;
+    }
+    @media (max-width: 620px) {
+      .brand h1 { font-size: 2.1rem; }
+      .hero h2 { font-size: 1.32rem; }
+      .features { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-    <script src="header.js"></script>
-    <h1>Bienvenido a la Agencia</h1>
-    <p>Próximamente: Red de Influencers de Lara.</p>
+  <header>
+    <div class="container">
+      <div class="brand">
+        <!-- Deja aquí tu logo próximamente -->
+        <h1>Xyrion Labs</h1>
+        <p>Agencia de Publicidad, Promoción y Descuentos para potenciar tu marca</p>
+      </div>
+      <nav>
+        <a href="#servicios">Servicios</a>
+        <a href="#por-que">¿Por qué Xyrion?</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h2>Aumenta tu visibilidad y ventas con estrategias innovadoras de publicidad y descuentos</h2>
+        <p>
+          En Xyrion Labs conectamos marcas con su público a través de campañas creativas, gestión de promociones, y descuentos irresistibles. ¡Impulsa tu negocio al siguiente nivel!
+        </p>
+        <a href="#contacto" class="cta">Solicita una Consulta Gratis</a>
+      </div>
+    </section>
+
+    <section class="features container" id="servicios">
+      <div class="feature">
+        <h3>Publicidad Efectiva</h3>
+        <p>Creamos y gestionamos campañas publicitarias segmentadas, enfocadas en resultados y posicionamiento para tu marca.</p>
+      </div>
+      <div class="feature">
+        <h3>Promociones & Descuentos</h3>
+        <p>Lanzamiento y administración de promociones y programas de descuentos atractivos para fidelizar clientes.</p>
+      </div>
+      <div class="feature">
+        <h3>Diseño y Creatividad</h3>
+        <p>Elaboramos materiales visuales impactantes para destacar tu marca en cualquier canal.</p>
+      </div>
+      <div class="feature">
+        <h3>Analítica & Optimización</h3>
+        <p>Monitoreamos y analizamos el desempeño de tus campañas para optimizar cada inversión publicitaria.</p>
+      </div>
+    </section>
+
+    <section class="features container" id="por-que">
+      <div class="feature">
+        <h3>Estrategia Personalizada</h3>
+        <p>Cada marca es única: armamos un plan a tu medida, alineado con tus metas y tu público.</p>
+      </div>
+      <div class="feature">
+        <h3>Equipo Experto</h3>
+        <p>Profesionales creativos y estrategas digitales dedicados a llevar tu negocio más lejos.</p>
+      </div>
+      <div class="feature">
+        <h3>Innovación Continua</h3>
+        <p>Aplicamos las últimas herramientas y tendencias para que siempre estés un paso adelante.</p>
+      </div>
+    </section>
+
+    <section class="container" id="contacto" style="margin-bottom:2.5rem;">
+      <div class="feature" style="background:#f1f5f9;">
+        <h3>Contáctanos</h3>
+        <p>¿Listo para crecer? Escríbenos a <a href="mailto:contacto@xyrionlabs.com" style="color:var(--accent);text-decoration:underline;">contacto@xyrionlabs.com</a> o llena el formulario que pronto añadiremos aquí.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <small>© 2026 Xyrion Labs. Todos los derechos reservados.</small>
+  </footer>
 </body>
 </html>
