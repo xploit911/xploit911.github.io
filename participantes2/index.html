@@ -1,1 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Rifa Transparente - Xyrion Labs</title>
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/xploit911/xploit911.github.io/refs/heads/main/logo.png">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #fafafa;
+      color: #161616;
+    }
+    header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
+      padding: 14px 8px 10px 8px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.07), 0 0.5px 0px rgba(0,0,0,0.04);
+    }
+    header img {
+      height: 46px;
+      width: auto;
+      display: block;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: auto;
+    }
+    .cta {
+      max-width: 420px;
+      margin: 22px auto 12px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 20px 16px 14px 16px;
+      text-align: center;
+    }
+    .cta h2 {
+      font-size: 1.35rem;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+      color: #161616;
+    }
+    .cta p {
+      color: #676767;
+      font-size: 1.05rem;
+      margin-bottom: 20px;
+    }
+    #participar {
+      background: #161616;
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 27px;
+      padding: 15px 0;
+      width: 100%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.18s;
+      margin-bottom: 10px;
+      box-shadow: 0 1.5px 8px rgba(0,0,0,0.12);
+    }
+    #participar:hover { background: #292929; }
+    #mensaje-error {
+      color: #d40000; background: #fff0f0; padding: 8px; border-radius: 5px; margin: 10px auto; max-width: 440px; text-align:center; display:none;
+      font-size: 1rem;
+    }
+    .contenedor-lista {
+      max-width: 500px;
+      margin: 12px auto 38px auto;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      padding: 13px 7px 13px 7px;
+      overflow-x: auto;
+    }
+    #tabla-participantes {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.98rem;
+    }
+    #tabla-participantes th, #tabla-participantes td {
+      padding: 8px 7px;
+      text-align: left;
+    }
+    #tabla-participantes th {
+      background: #f5f5f5;
+      color: #222;
+      position: sticky; top: 0; z-index: 2;
+    }
+    .vendido {
+      background: #ffd3d3;
+      color: #b30000;
+      opacity: 0.56;
+      text-decoration: line-through;
+      font-style: italic;
+    }
+    .disponible {
+      background: #d0ffd5;
+      color: #057c33;
+    }
+    /* Responsive */
+    @media (max-width: 600px) {
+      .cta, .contenedor-lista { max-width: 98vw; padding: 10px 2vw 10px 2vw; }
+      header img { height: 38px; }
+      #tabla-participantes th, #tabla-participantes td { font-size: 0.96rem; padding: 8px 2px;}
+    }
+    /* Botón scroll top */
+    #btn-scroll-top {
+      position: fixed;
+      bottom: 25px; right: 20px;
+      background: #141414;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 50%;
+      width: 44px; height: 44px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.21);
+      cursor: pointer;
+      display: none;
+      font-size: 2rem; line-height: 41px;
+      z-index: 30;
+      transition: background 0.13s;
+    }
+    #btn-scroll-top:hover { background: #262626; }
+    #cargando {
+      text-align: center; font-size: 1.07em; color: #363636; margin: 18px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/">
+      <img src="https://raw.githubusercontent.com/xploit911/xploit911.github.io/refs/heads/main/logo.png" alt="Xyrion Labs Logo" draggable="false">
+    </a>
+  </header>
+  <div class="cta">
+    <h2>¡Participa ahora en la rifa de Xyrion Labs!</h2>
+    <p>
+      Únete y gana increíbles premios. <br>
+      <strong>Esta lista de participantes es en vivo y transparente.</strong><br>
+      ¡Puedes ver quiénes ya tienen su ticket y cuáles aún están disponibles!
+    </p>
+    <a id="participar" href="#">Participar</a>
+  </div>
 
+  <div id="mensaje-error"></div>
+  <div class="contenedor-lista">
+    <div id="cargando">Cargando lista de participantes...</div>
+    <table id="tabla-participantes"></table>
+  </div>
+  <button id="btn-scroll-top" title="Ir arriba">↑</button>
+
+  <!-- JS -->
+  <script>
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGRh9mQsyUV8_pwye5MwALot-VwzA2WLe3X3_QKEDsRjOitG8K0OoW48u5DKV1_xJZJ_k8N13p7adf/pub?gid=656677130&single=true&output=csv";
+  const tabla = document.getElementById('tabla-participantes');
+  const mensajeError = document.getElementById('mensaje-error');
+  const cargando = document.getElementById('cargando');
+  const PARTICIPAR_FORM_URL = "/ruta-al-formulario.html"; // PON LA URL DE TU FORMULARIO AQUÍ
+  let dataFiltrada = [];
+  let limite = 100;
+  let offset = 0;
+  let totalFilas = 0;
+
+  // Maneja el query param ?promo
+  function actualizarBtnParticipar() {
+    const params = new URLSearchParams(window.location.search);
+    const promo = params.get('promo');
+    let formUrl = PARTICIPAR_FORM_URL;
+    if (promo) {
+      formUrl += (formUrl.includes('?') ? '&' : '?') + 'promo=' + encodeURIComponent(promo);
+    }
+    document.getElementById('participar').href = formUrl;
+  }
+
+  // CSV parsing simple y robusto (PapaParse es mejor si el contenido es problemático)
+  function parseCSV(text) {
+    const lines = [];
+    let current = [], field = '', inQuotes = false;
+    for (let i = 0; i < text.length; ++i) {
+      let char = text[i];
+      if (char === '"' && !inQuotes) { inQuotes = true; continue; }
+      if (char === '"' && inQuotes) {
+        if (text[i+1] === '"') { field += '"'; ++i; continue; }
+        inQuotes = false; continue;
+      }
+      if (char === ',' && !inQuotes) { current.push(field); field = ''; continue; }
+      if ((char === '\n' || char === '\r') && !inQuotes) {
+        if (field !== '') { current.push(field); field = ''; }
+        if (current.length > 0) { lines.push(current); current = []; }
+        if (char === '\r' && text[i+1] === '\n') ++i;
+        continue;
+      }
+      field += char;
+    }
+    if (field !== '' || current.length > 0) { current.push(field); lines.push(current);}
+    return lines;
+  }
+
+  // Filtrar y cargar más filas (scroll infinito)
+  function cargarFilasScroll() {
+    let hasta = Math.min(offset + limite, dataFiltrada.length);
+    for (let i = offset; i < hasta; ++i) {
+      const cols = dataFiltrada[i];
+      const estado = cols[3];
+      const clase = estado && estado.trim().toLowerCase() === "vendido" ? "vendido" : "disponible";
+      const fila = tabla.insertRow(-1);
+      fila.className = clase;
+      // Ticket
+      fila.insertCell().textContent = cols[0];
+      // Usuario (enlace)
+      const celdaUser = fila.insertCell();
+      celdaUser.innerHTML = `<a href="${cols[2]}" target="_blank" rel="noopener">${cols[1]}</a>`;
+      // Estado
+      fila.insertCell().textContent = estado;
+      // Referido (enlace)
+      const celdaRef = fila.insertCell();
+      celdaRef.innerHTML = `<a href="${cols[5]}" target="_blank" rel="noopener">${cols[4]}</a>`;
+      // Hora / Fecha
+      fila.insertCell().textContent = cols[6];
+      fila.insertCell().textContent = cols[7];
+    }
+    offset = hasta;
+    if (offset < dataFiltrada.length) {
+      tabla.insertRow(-1).outerHTML = '<tr id="fila-cargar-mas"><td colspan="6" style="text-align:center;cursor:pointer;font-size:1.02em;" onclick="cargarMasFilas()">Cargar más...</td></tr>';
+    }
+  }
+
+  function cargarMasFilas() {
+    const btn = document.getElementById('fila-cargar-mas');
+    if (btn) btn.remove();
+    cargarFilasScroll();
+  }
+  window.cargarMasFilas = cargarMasFilas; // Accesible global
+
+  // Render tabla y gestiona scroll infinito
+  function renderTabla(datos) {
+    tabla.innerHTML = '';
+    offset = 0;
+    dataFiltrada = datos.slice(1); // Primero es encabezado
+    totalFilas = dataFiltrada.length;
+    // Headers clave
+    let encabezado = datos[0] || ["Ticket","Usuario","Estado","Referido","Hora","Fecha"];
+    tabla.createTHead();
+    const thRow = tabla.tHead.insertRow();
+    ["Ticket","Usuario","Estado","Referido","Hora","Fecha"].forEach(txt=> {
+      const th = document.createElement('th'); th.textContent = txt; thRow.appendChild(th);
+    });
+    cargarFilasScroll();
+  }
+
+  // Fetch y refresco cada minuto
+  async function actualizarDatos() {
+    mensajeError.style.display = "none";
+    cargando.style.display = "block";
+    tabla.innerHTML = '';
+    try {
+      const resp = await fetch(CSV_URL, {cache: "reload"});
+      if (!resp.ok) throw new Error("No se pudo cargar el archivo.");
+      const csv = await resp.text();
+      let filas = parseCSV(csv);
+      filas = filas.filter(row => row.length>=8 && row[0]!==""); // filtrar filas vacías
+      renderTabla(filas);
+      cargando.style.display = "none";
+    } catch (e) {
+      cargando.style.display = "none";
+      mensajeError.textContent = "Error al obtener la lista: " + e.message;
+      mensajeError.style.display = "";
+    }
+  }
+
+  setInterval(actualizarDatos, 60000); // cada minuto
+
+  // Scroll top button
+  const btnScrollTop = document.getElementById('btn-scroll-top');
+  window.addEventListener('scroll', ()=>{
+    btnScrollTop.style.display = (window.scrollY>210)?"block":"none";
+  });
+  btnScrollTop.addEventListener('click', () => window.scrollTo({top:0,behavior:"smooth"}));
+
+  // Inicial
+  actualizarDatos();
+  actualizarBtnParticipar();
+
+  </script>
+</body>
+  </html>
