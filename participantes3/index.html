@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Xyrion Labs – Rifa de Promoción</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: #f5f6fa;
+      color: #222;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      background: #11172b;
+      padding: 0.65em 1em;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+    #logo {
+      height: 36px;
+      width: 36px;
+      margin-right: 12px;
+      border-radius: 6px;
+      background: #fff;
+      object-fit: cover;
+    }
+    h1 {
+      font-size: 1.3em;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin: 0;
+      color: #f4ff7a;
+    }
+    .container {
+      max-width: 460px;
+      margin: 0 auto;
+      padding: 1.25em 1em 2em 1em;
+    }
+    #participar-btn {
+      display: block;
+      width: 100%;
+      font-size: 1.13em;
+      padding: 12px;
+      border: none;
+      background: linear-gradient(90deg,#8c52ff,#5ce1e6);
+      color: #fff;
+      border-radius: 32px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin: 1.5em 0 1em 0;
+      cursor: pointer;
+      box-shadow: 0 2px 14px 1px rgba(140,82,255,0.12);
+      transition: filter 0.2s;
+    }
+    #participar-btn:hover { filter: brightness(1.09); }
+    #tabla-tickets {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 0.99em;
+      box-shadow: 0 2px 20px rgba(34,30,90,0.07);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1em;
+    }
+    #tabla-tickets thead { background: #f4ff7a; }
+    #tabla-tickets th, #tabla-tickets td {
+      padding: 0.48em 0.43em;
+      text-align: center;
+      border-bottom: 1px solid #f5f6fa;
+    }
+    #tabla-tickets td a {
+      color: #5c46e6; text-decoration: none; font-weight: 600;
+      word-break: break-all;
+    }
+    .vendido-row { background: #fee !important; color: #888; opacity: 0.8; }
+    .disponible-row { background: #e4fbe4 !important; }
+    @media (max-width: 560px) {
+      header, .container { padding-left: 0.3em; padding-right: 0.3em;}
+      h1 { font-size: 1.14em; }
+      #tabla-tickets th, #tabla-tickets td { padding: 0.42em 0.10em; font-size: 0.94em;}
+    }
+    @media (max-width: 400px) {
+      #logo {height:28px;width:28px;}
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <img src="LOGO_URL_HERE" id="logo" alt="Logo Xyrion Labs">
+  <h1>Xyrion Labs – Rifa</h1>
+</header>
+
+<div class="container">
+  <button id="participar-btn">🎉 Participar en la Rifa</button>
+
+  <table id="tabla-tickets">
+    <thead>
+      <tr>
+        <th>Ticket</th>
+        <th>Usuario</th>
+        <th>Estado</th>
+        <th>Referido</th>
+        <th>Hora</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody id="tbody-tickets">
+      <tr><td colspan="6">Cargando participantes...</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.98em;color:#888;">Actualización automática cada 30 segundos.</p>
+</div>
+
+<script>
+  // --- CONFIGURACIÓN ---
+
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTGRh9mQsyUV8_pwye5MwALot-VwzA2WLe3X3_QKEDsRjOitG8K0OoW48u5DKV1_xJZJ_k8N13p7adf/pub?gid=656677130&single=true&output=csv";
+  const PARTICIPAR_DESTINO = "https://xyrionlabs.com/participar"; // Cambia por el destino real
+
+  function getPromoCode() {
+    // Obtiene el código promo=... del query param (si está)
+    const params = new URLSearchParams(window.location.search);
+    return params.get('promo');
+  }
+
+  function construirParticiparURL() {
+    let base = PARTICIPAR_DESTINO;
+    const promo = getPromoCode();
+    if (promo !== null && promo.trim() !== "") {
+      // El destino ya tiene params?
+      base += (base.includes('?') ? '&' : '?') + "promo=" + encodeURIComponent(promo);
+    }
+    return base;
+  }
+
+  document.getElementById('participar-btn').onclick = () => {
+    window.location.href = construirParticiparURL();
+  };
+
+  // --- LÓGICA PARA CARGAR CSV Y MOSTRAR TABLA ---
+
+  async function cargarParticipantesCSV() {
+    const resp = await fetch(CSV_URL, {cache: "no-store"});
+    if (!resp.ok) return null;
+    return await resp.text();
+  }
+
+  function parseCSV(str) {
+    // Parse CSV simple para valores sin comillas
+    const rows = str.split("\n").map(l => l.replace(/\r/g,'').split(','));
+    // Necesitamos admitir comas en campos => Convierte usando una librería real si lo necesitas
+    return rows;
+  }
+
+  function renderTabla(rows) {
+    // Headings:
+    // [Ticket, Usuario, URL Usuario, Estado, Referido, URL Referido, Hora, Fecha]
+    const tbody = document.getElementById('tbody-tickets');
+    tbody.innerHTML = "";
+    if (rows.length <= 1) {
+      tbody.innerHTML = "<tr><td colspan='6'>Sin participantes aún.</td></tr>";
+      return;
+    }
+    const dataRows = rows.slice(1); // Salta encabezado
+    for (let r of dataRows) {
+      if (r.length < 8) continue;
+      const [ticket, usuario, urlUsuario, estado, referido, urlReferido, hora, fecha] = r;
+      let tr = document.createElement("tr");
+      if (estado.toLowerCase().includes("vendido")) tr.className = "vendido-row";
+      if (estado.toLowerCase().includes("disponible")) tr.className = "disponible-row";
+      tr.innerHTML = `
+        <td>${ticket}</td>
+        <td>${urlUsuario ? `<a href="${urlUsuario}" target="_blank" rel="noopener">${usuario}</a>` : usuario}</td>
+        <td>${estado}</td>
+        <td>${urlReferido ? `<a href="${urlReferido}" target="_blank" rel="noopener">${referido}</a>` : referido}</td>
+        <td>${hora}</td>
+        <td>${fecha}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  async function actualizarTabla() {
+    try {
+      const csv = await cargarParticipantesCSV();
+      if (!csv) throw new Error("No se pudo cargar");
+      const rows = parseCSV(csv);
+      renderTabla(rows);
+    } catch (e) {
+      document.getElementById('tbody-tickets').innerHTML =
+        `<tr><td colspan="6">No se pudo cargar la lista (${e.message})</td></tr>`;
+    }
+  }
+
+  actualizarTabla();
+  setInterval(actualizarTabla, 30000); // Cada 30s
+
+</script>
+</body>
+  </html>
